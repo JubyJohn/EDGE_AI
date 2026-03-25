@@ -1,0 +1,156 @@
+Temperature monitoring Model
+
+✅ Step 1: Upload code on Arduino IDE 
+
+#include "DHT.h"
+
+#define DHTPIN 4
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+}
+
+void loop() {
+  float temp = dht.readTemperature();
+
+  if (isnan(temp)) {
+    Serial.println("Error");
+  } else {
+    Serial.println(temp);  // Send ONLY temperature
+  }
+
+  delay(2000);
+}
+
+* Connect ESP32-S3 with DHT11
+ 3V3 -> VCC
+  4  -> Data
+ GND -> GND
+
+* Check on serial monitor , to make sure it shows only temperature
+
+
+📡 Step 2: Start Data Forwarder
+
+Close Serial Monitor ❗ (important)
+
+Then run:
+
+edge-impulse-data-forwarder
+
+Follow prompts:
+🔹 1. Login
+
+Enter email + password
+
+🔹 2. Select COM port
+
+Choose your ESP32-S3
+
+🔹 3. Enter sensor name
+
+Type:
+
+temperature
+
+✅ Expected output
+Connected to COMx
+Sampling...
+
+🌐 Step 3: Go to Studio
+
+Open 👉 Edge Impulse Studio
+
+📊 Step 4: Collect Data
+
+Go to:
+
+👉 Data Acquisition
+
+Collect 2 classes (important for ML)
+🔹 Class 1: normal
+Keep sensor at room temp
+Label: normal
+Record 20–30 samples
+🔹 Class 2: hot
+Warm sensor (use hand / near bulb)
+Label: hot
+Record 20–30 samples
+
+⚙️ Settings
+Sample length: 5000 ms
+Frequency: auto
+
+🧠 Step 5: Create Impulse in Edge Impulse Studio
+
+Go to:
+
+👉 Impulse Design → Create Impulse
+
+⚙️ Set this:
+Input block size: 5000 ms
+Processing block: Flatten
+Learning block: Classification
+
+👉 Click Save Impulse
+
+⚙️ Step 6: Generate Features
+
+Go to:
+
+👉 Flatten
+
+Click:
+
+👉 Generate Features
+
+✅ What happens
+Converts raw temperature data → ML-ready format
+You’ll see a graph (clusters)
+
+👉 Good sign:
+
+normal and hot should be somewhat separated
+
+🤖 Step 7: Train Model
+
+Go to:
+
+👉 Classifier
+
+Click:
+
+👉 Start Training
+
+⚙️ Recommended settings
+Epochs: 50
+Learning rate: default
+
+✅ After training
+You will see:
+
+Accuracy (aim >80%)
+Confusion matrix
+
+📊 Example result
+Actual	Predicted
+normal	normal         ✅
+hot	  hot          ✅
+
+🚀 Step 7: Test Model
+
+Go to:
+
+👉 Live Classification
+
+Click:
+
+👉 Start Sampling
+
+🔥 Try:
+Normal temp → should show normal
+Warm sensor → should show hot
