@@ -1,5 +1,12 @@
 # EDGE_AI
 
+🔷 What is Edge AI?
+
+Edge AI means running artificial intelligence directly on a device (microcontroller/edge device) instead of sending data to the cloud.
+
+👉 In simple words:
+AI runs inside device itself (like ESP32-S3), not on the internet.
+
 ### INSTALLATION
 
 #### 1. Nodejs
