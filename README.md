@@ -7,6 +7,14 @@ Edge AI means running artificial intelligence directly on a device (microcontrol
 👉 In simple words:
 AI runs inside device itself (like ESP32-S3), not on the internet.
 
+| Feature    | Cloud AI                | Edge AI      |
+| ---------- | ----------------------- | ------------ |
+| Processing | Internet server         | Local device |
+| Speed      | Slower (needs internet) | Very fast    |
+| Internet   | Required                | Not needed   |
+| Privacy    | Less secure             | More secure  |
+
+
 ### INSTALLATION
 
 #### 1. Nodejs
