@@ -1,0 +1,230 @@
+👉 Aim: To build Edge AI Project using  RGB LED to turn on different colours according to Joystick Movement
+
+🟢 STEP 1 — Hardware Test
+
+RGB LED:
+
+#include <Adafruit_NeoPixel.h>
+
+#define LED_PIN 48
+#define NUM_LEDS 1
+
+Adafruit_NeoPixel led(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  led.begin();
+  led.show(); // Initialize LED OFF
+}
+
+void loop() {
+  // RED
+  led.setPixelColor(0, led.Color(255, 0, 0));
+  led.show();
+  delay(1000);
+
+  // GREEN
+  led.setPixelColor(0, led.Color(0, 255, 0));
+  led.show();
+  delay(1000);
+
+  // BLUE
+  led.setPixelColor(0, led.Color(0, 0, 255));
+  led.show();
+  delay(1000);
+
+  // OFF
+  led.setPixelColor(0, led.Color(0, 0, 0));
+  led.show();
+  delay(1000);
+}
+
+🟢 STEP 2 — Create New Project
+
+In Edge Impulse:
+
+Create NEW project (important — don’t mix old data)
+Name: Motion Detection
+
+🟢 STEP 3 — Upload DATA COLLECTION CODE - JOYSTICK:
+
+#define X_PIN 1
+#define Y_PIN 2
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  int x = analogRead(X_PIN);
+  int y = analogRead(Y_PIN);
+
+  Serial.print(x);
+  Serial.print(",");
+  Serial.println(y);
+
+  delay(100);
+}
+
+🔌 CONNECTION
+
+| Joystick | ESP32-S3          |
+| -------- | ----------------- |
+| VRx      | GPIO 1            |
+| VRy      | GPIO 2            |
+| SW       | GPIO 3 (optional) |
+| VCC      | 3.3V              |
+| GND      | GND               |
+
+
+🟢 STEP 4 — Start Data Forwarder
+
+Open terminal:
+
+edge-impulse-data-forwarder
+
+👉 Select your project
+👉 It should detect:
+
+* 2 axes
+* ~10Hz
+
+🟢 STEP 5 — Collect DATA (MOST IMPORTANT)
+
+👉 Go to Data Acquisition
+
+Collect these labels:
+
+| Label  | Action           |
+| ------ | ---------------- |
+| up     | push joystick up |
+| down   | push down        |
+| left   | push left        |
+| right  | push right       |
+| center | leave center     |
+
+🔥 GOLDEN RULES
+✔ 200 samples per class
+✔ Add small variations (don’t hold perfectly still)
+✔ Keep classes balanced
+
+🟢 STEP 6 — Create IMPULSE
+
+Go to Impulse Design
+
+Set:
+
+Input: 2 axes
+Window size: 100 (good choice 👍)
+
+Add:
+
+✔ Processing: Flatten
+✔ Learning: Classification (NN)
+
+🟢 STEP 7 — Train MODEL
+
+Go to:
+👉 NN Classifier
+
+Train model
+You may see accuracy ~95–100%
+
+👉 Don’t trust blindly — test next step
+
+🟢 STEP 8 — LIVE TEST
+
+👉 Go to:
+Live Classification
+
+Move joystick and check:
+
+Does it detect correctly?
+
+🟢 STEP 9 — DEPLOY MODEL
+
+In Edge Impulse Studio:
+
+Go to Deployment
+Select:
+👉 Arduino Library
+Click:
+👉 Build → Download ZIP
+
+🟢 STEP 10 — IMPORT INTO ARDUINO
+
+Open Arduino IDE
+Go to:
+Sketch → Include Library → Add .ZIP Library
+Select downloaded ZIP
+
+🟢 STEP 11 — FINAL ESP32 CODE (WORKING)
+
+👉 Replace your_project_name_inferencing.h with your file name
+👉 Once library installed, name can be seen in compile window
+
+#include <Adafruit_NeoPixel.h>
+#include <Motion_detection_inferencing.h>
+
+#define X_PIN 1
+#define Y_PIN 2
+#define LED_PIN 48
+
+Adafruit_NeoPixel led(1, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  Serial.begin(115200);
+  led.begin();
+  led.show();
+}
+
+void loop() {
+  float buffer[2];
+
+  buffer[0] = analogRead(X_PIN);
+  buffer[1] = analogRead(Y_PIN);
+
+  signal_t signal;
+  numpy::signal_from_buffer(buffer, 2, &signal);
+
+  ei_impulse_result_t result;
+  run_classifier(&signal, &result, false);
+
+  // FIND BEST LABEL (IMPORTANT FIX)
+  float maxVal = 0;
+  String label = "";
+
+  for (size_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
+    if (result.classification[i].value > maxVal) {
+      maxVal = result.classification[i].value;
+      label = result.classification[i].label;
+    }
+  }
+
+  Serial.println(label);
+
+  // RGB LED CONTROL
+  if (label == "up") {
+    led.setPixelColor(0, led.Color(0, 0, 255));   // Blue
+  }
+  else if (label == "down") {
+    led.setPixelColor(0, led.Color(255, 0, 0));   // Red
+  }
+  else if (label == "left") {
+    led.setPixelColor(0, led.Color(0, 255, 0));   // Green
+  }
+  else if (label == "right") {
+    led.setPixelColor(0, led.Color(255, 255, 0)); // Yellow
+  }
+  else {
+    led.setPixelColor(0, led.Color(0, 0, 0));     // OFF (center)
+  }
+
+  led.show();
+  delay(100);
+}
+
+🎯 FINAL RESULT
+
+👉 Move joystick
+👉 ESP32 predicts direction
+👉 RGB LED changes instantly
