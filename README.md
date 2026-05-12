@@ -36,7 +36,7 @@ AI runs inside device itself (like ESP32-S3), not on the internet.
 
 #### 4. Command Prompt
 
-* Open command window
+* Open windows powershell
 * Type "npm install -g edge-impulse-cli"
 * Type "edge-impulse-daemon"
 * Input Username & Password
