@@ -71,6 +71,8 @@ Go to:
 
 👉 Data Acquisition
 
+on collect data section => see connected device,label, sampling
+
 Collect 2 classes (important for ML)
 🔹 Class 1: normal
 Keep sensor at room temp
