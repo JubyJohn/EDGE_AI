@@ -37,6 +37,8 @@ AI runs inside device itself (like ESP32-S3), not on the internet.
 
 #### 4. Command Prompt
 
+Frist you need to check whether vs build tool,node.js installed properly
+
 * Open windows powershell
 * Type "node -v"
 * Type "npm -v"
@@ -44,6 +46,8 @@ AI runs inside device itself (like ESP32-S3), not on the internet.
 * Type "edge-impulse-daemon"
 * Type "edge-impulse-data-forwarder --frequency 1"
 * Input Username & Password
+
+  If not worked
 
 ==> Uninstall broken global install:
 
